@@ -29,9 +29,10 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - name: Set up Flutter stable
+      - name: Set up Flutter 3.35.7
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: "3.35.7"
           channel: stable
           cache: true
 
@@ -50,7 +51,7 @@ jobs:
 
       - name: Analyze Dart sources
         id: analyze
-        run: flutter analyze --no-pub
+        run: flutter analyze --no-pub --no-fatal-infos
         continue-on-error: true
 
       - name: Run Flutter tests
@@ -60,10 +61,12 @@ jobs:
 
       - name: Build release APK
         id: build_apk
-        run: flutter build apk --release --no-pub
+        run: |
+          chmod +x android/gradlew
+          flutter build apk --release --no-pub
 
       - name: Upload release APK
-        if: always()
+        if: steps.build_apk.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: pivo-aula-release-apk

@@ -1,13 +1,15 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
 import '../../features/exams/domain/exam.dart';
 
 class NotificationService {
   static final NotificationService instance = NotificationService._internal();
   NotificationService._internal();
 
+  static const MethodChannel _timezoneChannel =
+      MethodChannel('com.aula.app/timezone');
   final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
@@ -17,8 +19,13 @@ class NotificationService {
     // Initialize Timezones
     tz.initializeTimeZones();
     try {
-      final timeZoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      final timeZoneName =
+          await _timezoneChannel.invokeMethod<String>('getLocalTimezone');
+      if (timeZoneName != null && timeZoneName.isNotEmpty) {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+      } else {
+        tz.setLocalLocation(tz.local);
+      }
     } catch (_) {
       // Fallback
       tz.setLocalLocation(tz.local);

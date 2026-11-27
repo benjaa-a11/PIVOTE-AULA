@@ -247,10 +247,12 @@ class BackupService {
   }
 
   Future<void> shareBackupFile(String filePath) async {
-    await Share.shareXFiles(
-      [XFile(filePath)],
-      subject: 'Respaldo de Pivote Aula',
-      text: 'Respaldo seguro y privado de mis datos académicos.',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(filePath)],
+        subject: 'Respaldo de Pivote Aula',
+        text: 'Respaldo seguro y privado de mis datos académicos.',
+      ),
     );
   }
 
